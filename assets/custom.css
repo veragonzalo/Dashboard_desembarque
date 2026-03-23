@@ -1,0 +1,319 @@
+/* ═══════════════════════════════════════════════════════════════
+   Dashboard Desembarque Pesquero — Estilos globales
+   ═══════════════════════════════════════════════════════════════ */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ── ROOT ───────────────────────────────────────────────────────── */
+.app-root {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+.app-root.dark-mode  { background: #0d0f1a; color: #e2e8f0; }
+.app-root.light-mode { background: #f0f4f8; color: #0f172a; }
+
+/* ── SIDEBAR ────────────────────────────────────────────────────── */
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  padding: 24px 18px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  z-index: 200;
+  transition: background 0.35s, border-color 0.35s, box-shadow 0.35s;
+  flex-shrink: 0;
+}
+.sidebar.dark-mode {
+  background: #0f1220;
+  color: #e2e8f0;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 4px 0 24px rgba(0,0,0,0.35);
+}
+.sidebar.light-mode {
+  background: #ffffff;
+  color: #0f172a;
+  border-right: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 4px 0 20px rgba(0,0,0,0.05);
+}
+
+/* Scrollbar sidebar */
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.25); border-radius: 4px; }
+
+/* ── MAIN CONTENT ───────────────────────────────────────────────── */
+.main-content {
+  flex: 1;
+  padding: 20px 22px 28px;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+/* ── HEADER ─────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  transition: background 0.35s, border-color 0.35s, box-shadow 0.35s;
+}
+.header.dark-mode {
+  background: #151827;
+  color: #e2e8f0;
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+}
+.header.light-mode {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid rgba(0,0,0,0.07);
+  box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+}
+
+/* ── CHART CARDS ────────────────────────────────────────────────── */
+.chart-card {
+  border-radius: 14px;
+  padding: 14px;
+  transition: background 0.35s, color 0.35s, border-color 0.35s, box-shadow 0.35s, transform 0.2s;
+  /* NO height:100% aquí — causa que el timeline se expanda a 100vh */
+}
+.chart-card:hover { transform: translateY(-2px); }
+.chart-card.dark-mode {
+  background: #151827;
+  color: #e2e8f0;
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 4px 22px rgba(0,0,0,0.4);
+}
+.chart-card.light-mode {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid rgba(0,0,0,0.07);
+  box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+}
+/* Dentro de columnas Bootstrap, sí queremos altura completa */
+.col .chart-card,
+[class*="col-"] .chart-card { height: 100%; }
+
+/* ── BRAND ──────────────────────────────────────────────────────── */
+.brand-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.brand-title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  line-height: 1.2;
+}
+.brand-sub {
+  font-size: 0.68rem;
+  opacity: 0.45;
+}
+
+/* ── ETIQUETAS DE SECCIÓN / FILTRO ──────────────────────────────── */
+.section-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.35;
+  margin-bottom: 14px;
+}
+.filter-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  opacity: 0.55;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 6px;
+  margin-top: 14px;
+}
+.sidebar-hr {
+  border: none;
+  border-top: 1px solid rgba(128,128,128,0.15);
+  margin: 18px 0;
+}
+
+/* ── BOTONES ────────────────────────────────────────────────────── */
+.reset-btn {
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  background: transparent;
+  border: 1px solid rgba(128,128,128,0.2);
+  color: inherit;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.reset-btn:hover {
+  background: rgba(128,128,128,0.1);
+  border-color: rgba(128,128,128,0.4);
+}
+.reset-btn:focus { outline: none; }
+
+.theme-btn {
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(128,128,128,0.2);
+  background: rgba(128,128,128,0.07);
+  color: inherit;
+  transition: all 0.3s;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+}
+.theme-btn:hover {
+  background: rgba(128,128,128,0.14);
+  border-color: rgba(128,128,128,0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.theme-btn:focus { outline: none; }
+
+/* ── RANGE SLIDER ───────────────────────────────────────────────── */
+.rc-slider-track,
+.rc-slider-tracks { background: #6366f1 !important; }
+.rc-slider-handle {
+  border-color: #6366f1 !important;
+  background: #6366f1 !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.25) !important;
+}
+.rc-slider-handle:hover,
+.rc-slider-handle:active { border-color: #818cf8 !important; }
+.rc-slider-rail { background: rgba(128,128,128,0.18) !important; }
+.rc-slider-mark-text {
+  font-size: 0.62rem !important;
+  color: rgba(128,128,128,0.55) !important;
+  font-family: 'Inter', sans-serif !important;
+}
+.rc-slider-dot { display: none !important; }
+
+/* ── DROPDOWN DARK MODE ─────────────────────────────────────────── */
+.dark-mode .dash-select .Select-control,
+.dark-mode .dash-select .Select--multi .Select-control {
+  background: #1e2235 !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  color: #e2e8f0 !important;
+  border-radius: 10px !important;
+}
+.dark-mode .dash-select .Select-placeholder,
+.dark-mode .dash-select .Select-value-label { color: #94a3b8 !important; }
+.dark-mode .dash-select .Select-menu-outer {
+  background: #1e2235 !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+}
+.dark-mode .dash-select .VirtualizedSelectOption,
+.dark-mode .dash-select .Select-option {
+  background: #1e2235 !important;
+  color: #e2e8f0 !important;
+}
+.dark-mode .dash-select .VirtualizedSelectFocusedOption,
+.dark-mode .dash-select .Select-option.is-focused {
+  background: #2d3250 !important;
+}
+.dark-mode .dash-select .Select--multi .Select-value {
+  background: rgba(99,102,241,0.18) !important;
+  border-color: rgba(99,102,241,0.35) !important;
+  color: #818cf8 !important;
+  border-radius: 6px !important;
+}
+
+/* Light mode dropdown */
+.light-mode .dash-select .Select-control {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  border-radius: 10px !important;
+}
+
+/* ── TEXTOS DE FILTROS EN SIDEBAR (dark / light) ────────────────── */
+/* Todos los label, span, p dentro del sidebar heredan el color del modo */
+.sidebar.dark-mode label,
+.sidebar.dark-mode span,
+.sidebar.dark-mode input[type=radio] + span,
+.sidebar.dark-mode .rc-slider-mark-text {
+  color: #e2e8f0 !important;
+}
+.sidebar.light-mode label,
+.sidebar.light-mode span,
+.sidebar.light-mode .rc-slider-mark-text {
+  color: #0f172a !important;
+}
+/* Radio e input heredan pero los forzamos */
+.sidebar.dark-mode  { color: #e2e8f0 !important; }
+.sidebar.light-mode { color: #0f172a !important; }
+
+/* ── CHECKLIST ──────────────────────────────────────────────────── */
+.tipo-checklist label { font-size: 0.82rem; gap: 0; }
+.tipo-checklist input[type=checkbox] { accent-color: #6366f1; }
+
+/* ── ANIMACIONES ────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.chart-card { animation: fadeUp 0.4s ease forwards; }
+
+/* ── KPI CARDS HOVER ────────────────────────────────────────────── */
+.col-3 > div:hover,
+.kpi-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.3) !important;
+}
+
+/* ── SCROLLBAR GLOBAL ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.4); }
+
+/* ── TOOLTIP SLIDER ─────────────────────────────────────────────── */
+.rc-slider-tooltip-inner {
+  background: #6366f1 !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.75rem !important;
+  border-radius: 6px !important;
+  padding: 3px 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+}
+.rc-slider-tooltip-arrow { border-top-color: #6366f1 !important; }
+
+/* ── HINT DE ARRASTRE EN TIMELINE ───────────────────────────────── */
+.chart-drag-hint {
+  text-align: center;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  opacity: 0.38;
+  margin-top: 2px;
+  padding-bottom: 2px;
+  pointer-events: none;        /* no interfiere con el hover del gráfico */
+  user-select: none;
+  transition: opacity 0.2s;
+}
+/* Al hacer hover sobre la card, el hint se vuelve más visible */
+.chart-card:hover .chart-drag-hint { opacity: 0.65; }
+
+/* ── BOOTSTRAP OVERRIDE — sin padding extra en filas ────────────── */
+.container-fluid { padding-left: 0 !important; padding-right: 0 !important; }

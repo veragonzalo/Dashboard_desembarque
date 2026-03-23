@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: dashboard-desembarque
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn dashboard:server --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+    envVars:
+      - key: PYTHONIOENCODING
+        value: utf-8

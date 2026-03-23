@@ -1,0 +1,21 @@
+# Entorno virtual
+.venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Variables de entorno
+.env
+.env.*
+
+# Archivos temporales
+*.log
+*.tmp
