@@ -2,10 +2,12 @@
 Dashboard Desembarque Pesquero — Chile 2000-2024
 Stack : Dash 4 + Plotly 6 + Dash Bootstrap Components
 """
+
 import os
 import dash
-from dash import dcc, html, Input, Output, State, callback_context
+from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
+from flask_caching import Cache
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -501,6 +503,45 @@ app = dash.Dash(
 app.title = "Dashboard Desembarque Chile"
 server = app.server          # expone el servidor Flask para gunicorn
 
+# ── Caché en memoria — mejora tiempos en filtros repetidos ───────────────────
+cache = Cache(server, config={"CACHE_TYPE": "SimpleCache", "CACHE_DEFAULT_TIMEOUT": 300})
+
+
+@cache.memoize(timeout=300)
+def _get_figures_cached(
+    theme: str,
+    y0: int, y1: int,
+    regions_key: tuple | None,
+    tipos_key: tuple | None,
+    aguas: str,
+) -> tuple:
+    """Calcula los 6 gráficos para una combinación de filtros.
+    El resultado queda cacheado 5 min — evita recalcular si el usuario
+    vuelve a los mismos filtros o varios usuarios comparten la vista.
+    """
+    t = THEMES[theme]
+    mask = (df["ano"] >= y0) & (df["ano"] <= y1)
+    if regions_key:
+        mask &= df["region"].isin(regions_key)
+    if not tipos_key:
+        empty = df.iloc[0:0]
+        return (
+            chart_timeline(empty, t), chart_map(empty, t), chart_treemap(empty, t),
+            chart_top_especies(empty, t), chart_donut(empty, t), chart_region_bar(empty, t),
+        )
+    mask &= df["tipo_agente"].isin(tipos_key)
+    if aguas != "ALL":
+        mask &= df["aguas"] == aguas
+    dff = df[mask]
+    return (
+        chart_timeline(dff, t),
+        chart_map(dff, t),
+        chart_treemap(dff, t),
+        chart_top_especies(dff, t),
+        chart_donut(dff, t),
+        chart_region_bar(dff, t),
+    )
+
 
 def G(gid: str, height: str = "100%") -> dcc.Graph:
     """Shorthand para crear un dcc.Graph limpio."""
@@ -623,45 +664,68 @@ app.layout = html.Div([
             ),
         ], id="header", className="header dark-mode"),
 
-        # KPIs
-        html.Div(id="kpi-row", className="mb-3"),
+        # Mensaje amigable de carga (se oculta al terminar el primer render)
+        dbc.Alert(
+            [
+                html.Span("⏳", style={"fontSize": "1.1em", "marginRight": "8px"}),
+                "Iniciando dashboard... Esto puede tomar hasta 60 segundos si la app estaba inactiva.",
+            ],
+            id="startup-msg",
+            color="info",
+            is_open=True,
+            dismissable=False,
+            className="mb-3",
+            style={"fontSize": "0.88rem", "borderRadius": "10px"},
+        ),
 
-        # Timeline — ancho completo
-        html.Div([
-            G("timeline-fig", "220px"),
-            html.Div(
-                "\u2190  Arrastra el gr\u00e1fico para desplazarte en el tiempo  \u2192",
-                className="chart-drag-hint",
-            ),
-        ], id="timeline-card", className="chart-card dark-mode mb-3"),
+        # Zona de gráficos — spinner mientras carga
+        dcc.Loading(
+            type="circle",
+            color="#6366f1",
+            children=[
 
-        # Mapa + Treemap
-        dbc.Row([
-            dbc.Col(
-                html.Div(G("map-fig", "440px"), id="map-card", className="chart-card dark-mode"),
-                width=6,
-            ),
-            dbc.Col(
-                html.Div(G("treemap-fig", "440px"), id="treemap-card", className="chart-card dark-mode"),
-                width=6,
-            ),
-        ], className="g-3 mb-3"),
+                # KPIs
+                html.Div(id="kpi-row", className="mb-3"),
 
-        # Top Especies + Donut + Regiones
-        dbc.Row([
-            dbc.Col(
-                html.Div(G("top-especies-fig", "360px"), id="top-card", className="chart-card dark-mode"),
-                width=4,
-            ),
-            dbc.Col(
-                html.Div(G("donut-fig", "360px"), id="donut-card", className="chart-card dark-mode"),
-                width=4,
-            ),
-            dbc.Col(
-                html.Div(G("region-fig", "360px"), id="region-card", className="chart-card dark-mode"),
-                width=4,
-            ),
-        ], className="g-3 mb-3"),
+                # Timeline — ancho completo
+                html.Div([
+                    G("timeline-fig", "220px"),
+                    html.Div(
+                        "\u2190  Arrastra el gr\u00e1fico para desplazarte en el tiempo  \u2192",
+                        className="chart-drag-hint",
+                    ),
+                ], id="timeline-card", className="chart-card dark-mode mb-3"),
+
+                # Mapa + Treemap
+                dbc.Row([
+                    dbc.Col(
+                        html.Div(G("map-fig", "440px"), id="map-card", className="chart-card dark-mode"),
+                        width=6,
+                    ),
+                    dbc.Col(
+                        html.Div(G("treemap-fig", "440px"), id="treemap-card", className="chart-card dark-mode"),
+                        width=6,
+                    ),
+                ], className="g-3 mb-3"),
+
+                # Top Especies + Donut + Regiones
+                dbc.Row([
+                    dbc.Col(
+                        html.Div(G("top-especies-fig", "360px"), id="top-card", className="chart-card dark-mode"),
+                        width=4,
+                    ),
+                    dbc.Col(
+                        html.Div(G("donut-fig", "360px"), id="donut-card", className="chart-card dark-mode"),
+                        width=4,
+                    ),
+                    dbc.Col(
+                        html.Div(G("region-fig", "360px"), id="region-card", className="chart-card dark-mode"),
+                        width=4,
+                    ),
+                ], className="g-3 mb-3"),
+
+            ],
+        ),
 
     ], id="main-content", className="main-content"),
 
@@ -719,6 +783,7 @@ CARD_IDS = ["timeline-card", "map-card", "treemap-card", "top-card", "donut-card
     Output("top-especies-fig",  "figure"),
     Output("donut-fig",         "figure"),
     Output("region-fig",        "figure"),
+    Output("startup-msg",       "is_open"),
     *[Output(cid, "className") for cid in CARD_IDS],
     Input("theme-store",    "data"),
     Input("year-range",     "value"),
@@ -730,27 +795,31 @@ def update_dashboard(theme, year_range, regions, tipos, aguas):
     t        = THEMES[theme]
     card_cls = f"chart-card {theme}-mode"
 
-    # Filtrado
-    dff = df.copy()
-    if year_range:
-        dff = dff[(dff["ano"] >= year_range[0]) & (dff["ano"] <= year_range[1])]
+    y0 = year_range[0] if year_range else ANOS[0]
+    y1 = year_range[1] if year_range else ANOS[-1]
+    regions_key = tuple(sorted(regions)) if regions else None
+    tipos_key   = tuple(sorted(tipos))   if tipos   else None
+    aguas_key   = aguas if aguas else "ALL"
+
+    # Gráficos — servidos desde caché si los filtros ya fueron calculados
+    figs = _get_figures_cached(theme, y0, y1, regions_key, tipos_key, aguas_key)
+
+    # KPIs — cálculo rápido (suma/nunique), sin caché necesario
+    mask = (df["ano"] >= y0) & (df["ano"] <= y1)
     if regions:
-        dff = dff[dff["region"].isin(regions)]
+        mask &= df["region"].isin(regions)
     if tipos:
-        dff = dff[dff["tipo_agente"].isin(tipos)]
+        mask &= df["tipo_agente"].isin(tipos)
     else:
-        dff = dff.iloc[0:0]  # vacío si no hay tipos seleccionados
+        mask &= pd.Series(False, index=df.index)
     if aguas and aguas != "ALL":
-        dff = dff[dff["aguas"] == aguas]
+        mask &= df["aguas"] == aguas
+    dff_kpi = df[mask]
 
     return (
-        make_kpi_cards(dff, t),
-        chart_timeline(dff, t),
-        chart_map(dff, t),
-        chart_treemap(dff, t),
-        chart_top_especies(dff, t),
-        chart_donut(dff, t),
-        chart_region_bar(dff, t),
+        make_kpi_cards(dff_kpi, t),
+        *figs,
+        False,          # ocultar mensaje de inicio tras el primer render
         *([card_cls] * len(CARD_IDS)),
     )
 

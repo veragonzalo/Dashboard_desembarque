@@ -4,3 +4,4 @@ plotly==6.6.0
 pandas==3.0.1
 numpy==2.4.3
 gunicorn==25.1.0
+flask-caching>=2.0.0
